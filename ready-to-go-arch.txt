@@ -1,0 +1,71 @@
+//minimal
+//bios
+ping archlinux.org ; timedatectl set-ntp true ; timedatectl set-timezone Pacific/Auckland ; timedatectl ; fdisk /dev/sda ; mkfs.ext4 /dev/sda2 ; mkswap /dev/sda1 ; swapon /dev/sda1 ; pacman -Syy ; pacman -S reflector ; cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.bak ; reflector -c "NZ" -f 12 -l 10 -n 12 --save /etc/pacman.d/mirrorlist ; mount /dev/sda2 /mnt ; pacstrap /mnt base linux linux-firmware vim nano networkmanager openssh man-db git base-devel ; genfstab -U /mnt >> /mnt/etc/fstab ; arch-chroot /mnt
+
+passwd ; pacman -S grub ; grub-install /dev/sda ; grub-mkconfig -o /boot/grub/grub.cfg ; timedatectl set-ntp true ; timedatectl set-timezone Pacific/Auckland ; nano /etc/locale.gen ; locale-gen ; echo LANG=en_NZ.UTF-8 > /etc/locale.conf ; export LANG=en_NZ.UTF-8 ; echo NAMEOFCOMPUTER > /etc/hostname ; nano /etc/hosts ; useradd -m BIGBOIUSER ; passwd BIGBOIUSER ; pacman -S sudo git base-devel ; EDITOR=nano visudo ; systemctl enable NetworkManager.service
+
+//uefi
+ping archlinux.org ; timedatectl set-ntp true ; timedatectl set-timezone Pacific/Auckland ; timedatectl ; fdisk /dev/sda ; mkfs.fat -F32 /dev/sda1 ; mkfs.ext4 /dev/sda3 ; mkswap /dev/sda2 ; swapon /dev/sda2 ; pacman -Syy ; pacman -S reflector ; cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.bak ; reflector -c "NZ" -f 12 -l 10 -n 12 --save /etc/pacman.d/mirrorlist ; mount /dev/sda2 /mnt ; pacstrap /mnt base linux linux-firmware vim nano networkmanager openssh man-db git base-devel ; genfstab -U /mnt >> /mnt/etc/fstab ; arch-chroot /mnt
+
+passwd ; pacman -S grub efibootmgr ; mkdir /boot/efi ; mount /dev/sda1 /boot/efi ; grub-install --target=x86_64-efi --bootloader-id=GRUB --efi-directory=/boot/efi ; grub-mkconfig -o /boot/grub/grub.cfg ; timedatectl set-ntp true ; timedatectl set-timezone Pacific/Auckland ; nano /etc/locale.gen ; locale-gen ; echo LANG=en_NZ.UTF-8 > /etc/locale.conf ; export LANG=en_NZ.UTF-8 ; echo NAMEOFCOMPUTER > /etc/hostname ; nano /etc/hosts ; useradd -m BIGBOIUSER ; passwd BIGBOIUSER ; pacman -S sudo git base-devel ; EDITOR=nano visudo ; systemctl enable NetworkManager.service
+
+
+//choose your gpu driver
+//open source driver
+//intel
+pacman -S xf86-video-intel mesa lib32-mesa vulkan-intel lib32-vulkan-intel vulkan-icd-loader lib32-vulkan-icd-loader
+//amd
+pacman -S xf86-video-amdgpu mesa lib32-mesa vulkan-radeon lib32-vulkan-radeon vulkan-icd-loader lib32-vulkan-icd-loader
+pacman -S xf86-video-ati mesa lib32-mesa vulkan-radeon lib32-vulkan-radeon vulkan-icd-loader lib32-vulkan-icd-loader
+//nvidia
+pacman -S xf86-video-nouveau nvidia-dkms nvidia-utils lib32-nvidia-utils nvidia-settings vulkan-icd-loader lib32-vulkan-icd-loader ; sudo reboot now
+
+//nvidia lol(closed source/proprietary)
+pacman -S nvidia nvidia-dkms nvidia-utils lib32-nvidia-utils nvidia-settings vulkan-icd-loader lib32-vulkan-icd-loader ; sudo reboot now
+//for non-existent gpus
+yay -S nvidia-390xx nvidia-dkms nvidia-390xx-utils lib32-nvidia-390xx-utils nvidia-settings vulkan-icd-loader lib32-vulkan-icd-loader ; sudo reboot now
+
+
+//yay and multilib
+sudo nano /etc/pacman.conf
+pacman -Syy
+git clone https://aur.archlinux.org/yay.git
+cd yay
+makepkg -si
+
+
+//install de or wm or just skip
+//xfce
+pacman -S xorg xfce4 xfce4-goodies lightdm lightdm-webkit2-greeter gvfs
+systemctl enable lightdm
+nano /etc/lightdm/lightdm.conf
+
+//kde
+pacman -S xorg plasma kde-applications
+systemctl enable sddm
+
+//i3-gaps
+yay -S xorg i3-gaps polybar dmenu network-manager-applet lightdm lightdm-webkit2-greeter betterlockscreen feh picom
+systemctl enable lightdm
+sudo nano /etc/lightdm/lightdm.conf
+//fonts for the example config
+yay -S xorg-fonts-misc ttf-unifont siji-git
+yay -S arandr autorandr blueberry breeze-icons cava cheese colorpicker conky cups dconf-editor exif fcitx fcitx-configtool fcitx-mozc fcitx-qt4 fcitx-qt5 featherpad flameshot geany gnome-disk-utility grub-theme-poly-dark-git gvfs hollywood htop jhead kleopatra libreoffice-still lxappearance mpv nerd-fonts-complete nmap nomacs ookla-speedtest-bin pavucontrol peaclock polybar-spotify-module proxychains-ng qalculate-gtk retroarch sayonara-player seahorse shc shotcut sl system-config-printer thunar thunar-archive-plugin thunar-media-tags-plugin thunar-volman tor-browser usbutils vidcutter xarchiver arj binutils bzip2 cpio gzip lha lrzip lz4 lzip lzop p7zip tar unarj unrar unzip xdg-utils xz zip zstd xreader youtube-dl
+systemctl reboot
+mkdir ~/.config/polybar
+cd ~/.config/polybar/
+touch launch.sh
+cp /usr/share/doc/polybar/config ~/.config/polybar/config
+chmod +x ~.config/polybar/launch.sh
+//xrandr --output "LVDS1" --mode "1366x768" --rotate "normal"
+nano ~/.config/i3/config
+nano ~/.config/polybar/launch.sh
+
+//i3-gaps 1 liner
+yay -S i3-gaps xorg polybar dmenu network-manager-applet lightdm lightdm-webkit2-greeter betterlockscreen feh picom ; systemctl enable lightdm ; yay -S xorg-fonts-misc ttf-unifont siji-git ; yay -S arandr autorandr blueberry breeze-icons cava cheese colorpicker conky cups dconf-editor exif fcitx fcitx-configtool fcitx-mozc fcitx-qt4 fcitx-qt5 featherpad flameshot geany gnome-disk-utility grub-theme-poly-dark-git gvfs hollywood htop jhead kleopatra libreoffice-still lxappearance mpv nerd-fonts-complete nmap nomacs ookla-speedtest-bin pavucontrol peaclock polybar-spotify-module proxychains-ng qalculate-gtk retroarch sayonara-player seahorse shc shotcut sl system-config-printer thunar thunar-archive-plugin thunar-media-tags-plugin thunar-volman tor-browser usbutils vidcutter xarchiver arj binutils bzip2 cpio gzip lha lrzip lz4 lzip lzop p7zip tar unarj unrar unzip xdg-utils xz zip zstd xreader youtube-dl ; systemctl reboot ; mkdir ~/.config/polybar ; cd ~/.config/polybar/ ; touch ~/.config/polybar/launch.sh ; cp /usr/share/doc/polybar/config ~/.config/polybar/config ; chmod +x ~.config/polybar/launch.sh ; nano ~/.config/i3/config ; nano ~/.config/polybar/launch.sh
+
+//important apps
+yay -S ntfs-3g noto-fonts noto-fonts-cjk noto-fonts-emoji noto-fonts-extra pulseaudio-alsa pulseaudio-bluetooth bluez-utils thefuck tor-browser firefox neofetch figlet lolcat spotify gimp inkscape blender krita bashtop dosbox steam proton-ge-custom-bin supertuxkart cmatrix hollywood
+
+//for xarchiver
+yay -S arj binutils bzip2 cpio gzip lha lrzip lz4 lzip lzop p7zip tar unarj unrar unzip xdg-utils xz zip zstd

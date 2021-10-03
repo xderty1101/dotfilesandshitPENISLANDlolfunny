@@ -1,0 +1,531 @@
+<!--burn disk image-->
+<!--linux-->
+sudo dd bs=4M if=file.iso of=/dev/sdX conv=fsync oflag=direct status=progress
+<!--windows :(-->
+rufus
+<!--everyone :D-->
+balenaetcher
+
+ip link
+<!--connect to wifi if needed-->
+wifi-menu
+
+ping archlinux.org 
+timedatectl set-ntp true
+timedatectl
+timedatectl list-timezones
+<!--put your own country-->
+timedatectl set-timezone Pacific/Auckland
+timedatectl
+
+<!--check if bios or uefi-->
+ls /sys/firmware/efi/efivars
+<!--if it doesn't exist then you are using bios-->
+
+<!--select disk you want to install with-->
+fdisk -l
+fdisk /dev/sdx
+
+<!--select defaults by pressing enter-->
+<!--scroll through lists using arrow keys and page up/down>
+<!--press q to exit lists-->
+<!--delete all partitions-->
+d
+
+<!--UEFI setup-->
+<!--make sure that you change disk to gpt-->
+<!--do not do if dual booting on the same disk-->
+g
+
+<!--create efi-->
+n
+default
+default
++512M
+t
+L
+<!--find efi system or EFI(FAT-12/16/32) and type corresponding number-->
+
+<!--optional swap partition (recomended for people with little ram (8gb and under) a swap file in the root partition will also work instructions below)-->
+n
+default
+default
+<!--x can be any amount you want, if you're not sure just pick the same amount of ram you have, 4gb ram/4gb swap-->
++xGB
+<!--end of optional swap, please continue below :3>
+
+<!--create root-->
+n
+default
+default
+default
+
+w
+
+<!--format your efi partition (do fdisk -l if you don't know which one it is)-->
+mkfs.fat -F32 /dev/sdx1
+<!--format your root partition (do fdisk -l if you don't know which one it is)-->
+mkfs.ext4 /dev/sdx2
+<!--if you made a swap partition do below (do fdisk -l if you don't know which one it is)-->
+mkswap /dev/sdxy ; swapon /dev/sdxy
+
+
+
+<!--non-UEFI (bios) setup-->
+
+<!--optional task for big kids-->
+<!--do not do optional task if dual booting with windows on same drive in bios mode-->
+<!--use gpt instead of mbr/dos (optional)-->
+g
+
+n
+default
+default
++1M
+
+t
+L
+<!--find BIOS boot and type corresponding number-->
+<!--end of optional mbr/dos please continue below :3-->
+<!--if you didn't do this then do command below-->
+o
+
+<!--optional swap partition (recomended for people with little ram (8gb and under) a swap file in the root partition will also work instructions below)-->
+n
+default
+default
+<!--x can be any amount you want, if you're not sure just pick the same amount of ram you have, 4gb ram/4gb swap-->
++xGB
+
+t
+L
+<!--find linux swap and type corresponding number-->
+<!--end of optional swap, please continue below :3>
+
+<!--create root-->
+n
+default
+default
+default
+
+w
+
+<!--format your root partition (do fdisk -l if you don't know which one it is)-->
+mkfs.ext4 /dev/sdx1
+<!--if you made a swap partition do below (do fdisk -l if you don't know which one it is)-->
+mkswap /dev/sdxy ; swapon /dev/sdxy
+<!--you do not need to do anything for the BIOS boot partition>
+
+
+
+<!--all-->
+pacman -Syy
+pacman -S reflector
+
+<!--pacman backup-->
+cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.bak
+reflector -c "NZ" -f 12 -l 10 -n 12 --save /etc/pacman.d/mirrorlist
+
+<!--mount root  do fdisk -l if you don't know (it's the "linux filesystem")-->
+mount /dev/sdx2 /mnt
+pacstrap /mnt base linux linux-firmware vim nano dhcpcd openssh man-db
+
+<!--control your newly installed system on your disk (kind of like ssh but not wireless)-->
+genfstab -U /mnt >> /mnt/etc/fstab
+arch-chroot /mnt
+
+<!--set root password-->
+passwd
+
+<!--only enable if you're going disconnect from usb or don't want to use networkmanager-->
+<!--do not have both enabled at the same time-->
+systemctl enable dhcpcd
+
+
+<!--bootloader-->
+
+<!--UEFI setup-->
+pacman -S grub efibootmgr
+mkdir /boot/efi
+mount /dev/sdx1 /boot/efi
+grub-install --target=x86_64-efi --bootloader-id=GRUB --efi-directory=/boot/efi
+grub-mkconfig -o /boot/grub/grub.cfg
+
+
+
+<!--non-UEFI setup-->
+pacman -S grub
+grub-install /dev/sdx
+grub-mkconfig -o /boot/grub/grub.cfg
+
+<!--minimal arch system installed-->
+<!--you now could take out the usb and contine directly from the disk or just contine normally-->
+
+
+
+<!--all-->
+timedatectl
+timedatectl set-ntp true
+timedatectl list-timezones
+<!--put your own country-->
+timedatectl set-timezone Pacific/Auckland
+timedatectl
+
+<!--setup locale-->
+<!--uncomment as many locales you need (usually just the UTF-8 ones are fine (and prefered))-->
+nano /etc/locale.gen
+locale-gen
+<!--check if the locales you selected are right (it's ok if C and POSIX are there)-->
+locale -a
+
+<!--set system language (only one)-->
+<!--change LANG to your own language eg en_NZ.UTF-8-->
+<!--list possible options   press q to exit-->
+cat /etc/locale.gen | less
+<!--only put in 1 line (without spaces)     eg. en_GB.UTF-8     NOT en_GB.UTF-8 UTF-8-->
+
+echo LANG=en_GB.UTF-8 > /etc/locale.conf
+export LANG=en_GB.UTF-8
+<!--check if your settings are correct-->
+locale
+<!--we can change the locale at any time (guide near the bottom)-->
+
+echo yournameofyourpc > /etc/hostname
+<!--you could use vim or nano to edit /etc/hosts use nano for beginners-->
+<!--press tab to make big spaces-->
+nano /etc/hosts
+127.0.0.1	localhost
+::1		localhost
+127.0.1.1	yournameofpc.localdomain	yournameofpc
+
+
+useradd -m fancyNewUsername
+passwd fancyNewUsername
+pacman -S sudo
+
+
+<!--default editor for visudo is vim-->
+visudo
+<!--use below for nano (beginner friendly)-->
+EDITOR=nano visudo
+
+<!--add to visudo to be in sudoers-->
+fancyNewUsername ALL=(ALL) ALL
+
+<!--add to make default editor for visudo nano-->
+## Defaults specification
+##
+Defaults editor=/path/to/editor/eg/usr/bin/nano
+
+<!--add to add lecture everytime you use sudo-->
+##
+## options are always, once, never
+Defaults lecture="always"
+
+
+<!--install kde or other desktop environment-->
+pacman -S xorg plasma kde-applications
+<!--if you want wayland-->
+pacman -S xorg plasma kde-applications plasma-wayland-session
+
+systemctl enable sddm.service
+<!--do not enable if you are going to use dhcpcd-->
+<!--do not use both at the same time-->
+<!--to check it's on, do    systemctl status dhcpcd-->
+systemctl enable NetworkManager.service
+<!--exit chroot-->
+exit
+shutdown now
+
+<!--other shit-->
+sudo pacman -S git base-devel
+git clone https://aur.archlinux.org/yay.git
+cd yay
+makepkg -si
+yay -S ntfs-3g noto-fonts noto-fonts-cjk noto-fonts-emoji noto-fonts-extra alsa-utils thefuck gnome-disk-utility firefox vlc neofetch spotify tetrio-desktop
+
+<!--you're done gg-->
+
+<!--if you have any problems try re installing it or clear cache (applys to pacman too)-->
+eg yay -S dolphin
+or try yay -Scc
+
+<!--network manager keeps asking to log in to network (can use firefox can't use spotify)-->
+go to /usr/lib/NetworkManager/conf.d/20-connectivity.conf and change link to https://networkcheck.kde.org
+
+<!--yay/pacman/paru guide-->
+<!--use this to create mirrorlist   https://archlinux.org/mirrorlist/-->
+<!--removing stuff and other shit-->
+yay -Qdtq | yay -Rs -
+<!--removes unused dependencies-->
+yay -R my-app-i-want-to-remove other-app-i-want-to-remove
+<!--removes app nothing else-->
+yay -Rs my-app-i-want-to-remove other-app-i-want-to-remove
+<!--removes app and dependencies used by the app that are not needed
+yay -Syu
+<!--upgrade packages-->
+yay -Scc
+<!--clears cache-->
+
+<!--install aur packages and compile manually-->
+git clone https://aur.archlinux.org/package_name.git
+cd package_name
+<!--check for sus-->
+cat PKGBUILD
+less PKGBUILD
+
+<!--enable double click to open files in dolphin-->
+~/.config/kdeglobals
+<!--under [KDE] add-->
+SingleClick=false
+
+save and reboot to apply
+
+<!--install blender from website-->
+Get tar.gz from blender website and unpack to somewere
+<!--Edit blender.desktop-->
+Exec=/whereYourBlenderIs/blender-2.83.9-linux64/blender %f
+
+or install using yay -S blender
+
+
+
+<!--ssh-->
+ssh username@ip
+<!--trusted keys are in ~/.ssh/known_hosts-->
+
+
+
+<!--setup bluetooth and bluetooth audio-->
+systemctl enable bluetooth
+systemctl start bluetooth
+sudo pacman -S pulseaudio-alsa pulseaudio-bluetooth bluez-utils
+
+
+
+<!--setup printing-->
+yay -S cups
+systemctl enable cups.service
+add your printer in system settings
+
+
+
+<!--setup japanese input-->
+yay -S fcitx-configtool fcitx-mozc
+
+Go to fcitx-configtool and add mozc
+
+<!--add below to /etc/environment-->
+GTK_IM_MODULE=fcitx
+QT_IM_MODULE=fcitx
+XMODIFIERS=@im=fcitx
+
+go to settings > startup and shutdown > autostart and add fcitx
+
+<!--to make fcitx work in kate and other qt applications follow below-->
+yay -S fcitx-qt4 fcitx-qt5
+
+
+
+<!--setup locale-->
+<!--diplay enabled locales-->
+locale -a
+
+<!--un hash the languages you want-->
+sudo nano /etc/locale.gen
+sudo locale-gen
+
+<!--check if you added the stuff-->
+locale -a
+
+<!--check locale settings-->
+locale
+sudo nano /etc/locale.conf
+<!--first language is default eg display language-->
+<!--second language is other eg login some app menus (in my experience)-->
+<!--recomended that you only put 1 language because it almost broke my system lol-->
+
+
+
+<!--setup time-->
+timedatectl
+timedatectl list-timezones
+timedatectl set-timezone Pacific/Auckland
+timedatectl set-ntp true
+
+
+
+<!--setup dual boot with grub-->
+<!--assuming you have grub-->
+yay -S os-prober
+sudo nano /etc/default/grub
+GRUB_DISABLE_OS_PROBER=false
+
+sudo grub-mkconfig -o /boot/grub/grub.cfg
+
+<!--if os doesn't show in grub menu check advanced options-->
+
+<!--if it doesn't detect os-->
+reinstall os-prober (yay -S os-prober)
+
+<!--if it still doesn't work-->
+<!--check drives-->
+lsblk
+<!--or-->
+sudo fdisk -l
+
+sudo mount /dev/sdx /mnt
+<!--mount drive or partition with other os-->
+
+
+
+<!--customise grub <3-->
+<!--makes grub compelex and harder to fix a mess up grub (small chance)-->
+<!--edit the actual file if possible (it's not that hard)-->
+yay -S grub-customizer
+echo have fun
+
+
+
+<!--run commands when you open terminal (bash)-->
+add commands in .bashrc
+
+
+
+<!--Configure touch screen-->
+<!--find mre info at https://wiki.archlinux.org/title/Calibrating_Touchscreen-->
+<!--list input devices touchscreen, pen, tablet etc-->
+xinput list
+<!--check current config-->
+<!--I recomend that you copy and save it somewere-->
+<!--by default it is 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000-->
+xinput list-props "Device name/id"
+<!--find current monitor config-->
+xrandr
+<!--calculate below-->
+c0 = touch_area_width / total_width
+c2 = touch_area_height / total_height
+c1 = touch_area_x_offset / total_width
+c3 = touch_area_y_offset / total_height
+<!--run below to calibrate your touchscreen (replace c0, c1, c2, c3 with what you got)-->
+xinput set-prop "Device Name" --type=float "Coordinate Transformation Matrix" c0 0 c1 0 c2 c3 0 0 1
+
+<!--Automaticly set your touchscreen calibration-->
+<!--install autorandr-->
+yay -S autorandr
+<!--Set up how you want your config and save a profile for it eg laptop touchscreen with 3 monitors-->
+autorandr -s whatYouWantToNameYourCurrentConfig
+<!--repeat as needed for as many configs (eg a laptop touchscreen config without a monitor)-->
+
+<!--create the magic-->
+<!--go to ~/.config/autorandr-->
+<!--you will see your configs-->
+<!--go into 1 of your profiles and create a bash script called  postswitch  -->
+<!--make sure it's executable-->
+<!--your should script will look something like this with your touchscreen calibration-->
+
+#!/bin/sh
+xinput set-prop "15" --type=float "Coordinate Transformation Matrix" 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000
+xinput set-prop "18" --type=float "Coordinate Transformation Matrix" 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000
+
+<!--you may put other commands if you want-->
+
+<!--I think I'm fucking dumb don't use what ever I typed before(autorandr is godly though)-->
+<!--use this instead-->
+xinput --map-to-output 'TouchScreenNameOrDrawingTabletOrSomethingIDK' HDMIorWhateverYourScreenIsCalledUseXrandrToFindOut1
+
+
+
+<!--run single app alone without DE-->
+sudo pacman -S xorg xorg-xinit xorg-twm
+cp /etc/X11/xinit/xinitrc ~/.xinitrc
+<!--edit end of line and edit-->
+xinit -- :1
+
+
+
+<!--polybar setup-->
+yay -S polybar xorg-fonts-misc ttf-unifont siji-git
+cp /usr/share/doc/polybar/config ~/.config/polybar/config
+nano ~/config/i3/config
+<!--add to end of line-->
+exec_always --no-startup-id $HOME/.config/polybar/launch.sh
+
+
+
+<!--insperation-->
+FOSS > closed source
+sharing is caring
+share power it's good
+only have and use what you can control
+
+you are beutiful no matter how shit your spelling is
+look behind the options on the menu, go off road
+
+listen to understand, not to listen
+reply to communicate, not reply
+
+hack people with kindness
+people are blinded by their confidence and YOURS
+there are an infinite amount of options to do 1 thing
+try subtracting from somthing rather than adding
+<!--there are always people you can rely on you can do it :3-->
+http://printwiki.org/Front_Page
+
+
+
+
+<!--my konsole setup (now using alacritty btw)-->
+settings > manage profiles > new
+Initial terminal size | 110 columns | 28 rows
+Tab title format | %d %n
+Remote tab title format | (%u) %H
+Tab color | white
+Threshold for continuous silence | 10 seconds
+
+Apperearnce > New
+#bad3fc | #cde0ff | #95a9ca
+#000000 | #000000 | #000000
+#000000 | #686868 | #181818
+#fa4b4b | #ff5454 | #651919
+#18b218 | #54ff54 | #006500
+#b26818 | #ffff54 | #654a00
+#1818b2 | #5454ff | #000065
+#e11ee1 | #ff54ff | #5f055f
+#18b2b2 | #54ffff | #006565
+#b2b2b2 | #ffffff | #656565
+
+Blur background
+Background transparency | 20%
+
+Cursor
+Shape | Block
+Color | custom color cursor
+Cursor | #18f018
+Text | #000000
+Blinking | disabled
+
+Misc
+line spacing | 0px
+Margins | 1px
+Align to center | Disabled
+Window | Show hint for terminal size after resizing
+
+
+Scrollback | fixed size | 3069
+Scroll page up/down | half screen height
+Scrollbar position | Right side
+Highlighting | highlight the lines coming into view
+
+Keeb | default
+
+Word characters
+:@-./_~?&=%+#
+Triple-click selects | The whole line
+Middle click pastes | from selection
+Copy options | Copy on select | Copy text as HTML
+Misc | Underline links | Require Ctrl key for drag & drop | Disable drag & drop menu for files and URLs | Allow Ctrl+scrollwheel to zoom text size | Enable alternate screen buffer scrolling
+
+Advanced
+Misc | Allow blinking text | Flow control | Bi-directional text rendering
+Default charcter encoding | UTF-8

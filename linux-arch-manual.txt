@@ -456,7 +456,6 @@ exec_always --no-startup-id $HOME/.config/polybar/launch.sh
 <!--insperation-->
 FOSS > closed source
 sharing is caring
-share power it's good
 only have and use what you can control
 
 you are beutiful no matter how shit your spelling is
@@ -468,7 +467,6 @@ reply to communicate, not reply
 hack people with kindness
 people are blinded by their confidence and YOURS
 there are an infinite amount of options to do 1 thing
-try subtracting from somthing rather than adding
 <!--there are always people you can rely on you can do it :3-->
 http://printwiki.org/Front_Page
 

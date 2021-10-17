@@ -1,0 +1,40 @@
+Terminal	|	alacritty
+Fetch		|	pfetch
+
+Drawing		|	krita, pinta
+Image editing	|	gimp
+Video editing	|	Shotcut, vidcutter
+3d		|	blender
+Vector graphics	|	inkscape
+DAW		|	lmms
+Office		|	libreoffice
+
+File manager	|	thunar
+Compression	|	xarchiver
+Text editor	|	l3afpad, vim
+Image viewer	|	nomacs
+PDF viewer	|	xreader
+Video viewer	|	mpv
+Music player	|	mpd, ncmpcpp
+Camera		|	cheese
+
+Browser		|	firefox, tor
+Screenshot	|	flameshot
+
+App launcher	|	rofi
+Compositor	|	picom
+Bar		|	polybar
+WM		|	i3-gaps
+BG image thing	|	feh
+Lockscreen	|	betterlockscreen
+Screen stuff	|	arandr, autorandr
+Audio		|	pulseaudio, pavucontrol
+Bluetooth	|	blueberry
+Internet	|	networkmanager, nm-connection-editor, network-manager-applet
+Input		|	fcitx, fcitx-configtool, fcitx-mozc, fcitx-qt4, fcitx-qt5, gucharmap
+Printing	|	cups, system-config-printer
+Disk Management	|	gnome-disks-utility
+Keyring		|	seahorse
+Polkit		|	lxsession
+
+Games		|	steam, supertuxkart, dosbox, ktuberling

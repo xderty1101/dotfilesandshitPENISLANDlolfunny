@@ -34,7 +34,7 @@ d
 
 <!--UEFI setup-->
 <!--make sure that you change disk to gpt-->
-<!--do not do if dual booting on the same disk-->
+<!--If you're dual booting double check if you really have UEFI otherwise your dual boot won't work or something(with windows, idk about mac, linux is fine-->
 g
 
 <!--create efi-->
